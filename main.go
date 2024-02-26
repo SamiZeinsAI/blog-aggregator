@@ -1,17 +1,21 @@
 package main
 
 import (
+	"database/sql"
 	"log"
 	"net/http"
 	"os"
 
+	"github.com/SamiZeinsAI/blog-aggregator/internal/database"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
 	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 )
 
 type apiConfig struct {
 	port string
+	DB   *database.Queries
 }
 
 func main() {
@@ -19,8 +23,15 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	dbUrl := os.Getenv("POSTGRES")
+	db, err := sql.Open("postgres", dbUrl)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	apiCfg := apiConfig{
 		port: os.Getenv("PORT"),
+		DB:   database.New(db),
 	}
 
 	router := chi.NewRouter()
@@ -29,6 +40,8 @@ func main() {
 
 	v1Router.Get("/readiness", apiCfg.GetReadinessHandler)
 	v1Router.Get("/err", apiCfg.GetErrorHandler)
+
+	v1Router.Post("/users", apiCfg.PostUserHandler)
 
 	router.Mount("/v1", v1Router)
 	srv := &http.Server{
