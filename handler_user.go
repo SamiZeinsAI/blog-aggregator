@@ -5,29 +5,17 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/SamiZeinsAI/blog-aggregator/internal/auth"
 	"github.com/SamiZeinsAI/blog-aggregator/internal/database"
 	"github.com/google/uuid"
 )
 
-func (cfg *apiConfig) handlerUsersGet(w http.ResponseWriter, r *http.Request) {
+func (cfg *apiConfig) handlerUsersGet(w http.ResponseWriter, r *http.Request, user database.User) {
 	type returnVals struct {
 		Id        string `json:"id"`
 		CreatedAt string `json:"created_at"`
 		UpdatedAt string `json:"updated_at"`
 		Name      string `json:"name"`
 		ApiKey    string `json:"api_key"`
-	}
-	apiKey, err := auth.GetAuthorizationKey(r.Header)
-	if err != nil {
-		respondWithError(w, 400, "Error getting authorization key")
-		return
-	}
-
-	user, err := cfg.DB.GetUserByAPIKey(r.Context(), apiKey)
-	if err != nil {
-		respondWithError(w, 400, "Error getting user from database")
-		return
 	}
 	respBody := returnVals{
 		Id:        user.ID.String(),
@@ -39,7 +27,7 @@ func (cfg *apiConfig) handlerUsersGet(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	err = json.NewEncoder(w).Encode(respBody)
+	err := json.NewEncoder(w).Encode(respBody)
 	if err != nil {
 		respondWithError(w, 500, "Error encoding response body")
 		return
