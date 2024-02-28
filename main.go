@@ -24,24 +24,32 @@ func main() {
 		log.Fatal(err)
 	}
 	dbUrl := os.Getenv("POSTGRES")
-	db, err := sql.Open("postgres", dbUrl)
+	conn, err := sql.Open("postgres", dbUrl)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	apiCfg := apiConfig{
 		port: os.Getenv("PORT"),
-		DB:   database.New(db),
+		DB:   database.New(conn),
 	}
 
 	router := chi.NewRouter()
-	router.Use(cors.Handler(cors.Options{}))
+	router.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"https://*", "http://*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"*"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: false,
+		MaxAge:           300,
+	}))
 	v1Router := chi.NewRouter()
 
-	v1Router.Get("/readiness", apiCfg.GetReadinessHandler)
-	v1Router.Get("/err", apiCfg.GetErrorHandler)
+	v1Router.Get("/readiness", apiCfg.handlerReadiness)
+	v1Router.Get("/err", apiCfg.handlerErr)
 
-	v1Router.Post("/users", apiCfg.PostUserHandler)
+	v1Router.Post("/users", apiCfg.handlerUsersCreate)
+	v1Router.Get("/users", apiCfg.handlerUsersGet)
 
 	router.Mount("/v1", v1Router)
 	srv := &http.Server{
