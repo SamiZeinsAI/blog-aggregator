@@ -19,18 +19,18 @@ type Feed struct {
 	UserID    uuid.UUID
 }
 
+type FeedsUser struct {
+	ID        uuid.UUID
+	FeedID    uuid.UUID
+	UserID    uuid.UUID
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
 type User struct {
 	ID        uuid.UUID
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	Name      string
 	ApiKey    string
-}
-
-type UsersFeed struct {
-	ID        uuid.UUID
-	FeedID    uuid.UUID
-	UserID    uuid.UUID
-	CreatedAt time.Time
-	UpdatedAt time.Time
 }

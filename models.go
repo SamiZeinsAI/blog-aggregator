@@ -45,8 +45,8 @@ type User struct {
 	ApiKey    string
 }
 
-func databaseUsersFeedsToUsersFeeds(usersFeeds database.UsersFeed) UsersFeeds {
-	return UsersFeeds{
+func databaseUsersFeedsToUsersFeeds(usersFeeds database.FeedsUser) FeedsUser {
+	return FeedsUser{
 		ID:        usersFeeds.ID,
 		FeedID:    usersFeeds.FeedID,
 		UserID:    usersFeeds.UserID,
@@ -55,7 +55,7 @@ func databaseUsersFeedsToUsersFeeds(usersFeeds database.UsersFeed) UsersFeeds {
 	}
 }
 
-type UsersFeeds struct {
+type FeedsUser struct {
 	ID        uuid.UUID
 	FeedID    uuid.UUID
 	UserID    uuid.UUID

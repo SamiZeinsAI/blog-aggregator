@@ -24,8 +24,8 @@ func (cfg *apiConfig) handlerFeedCreate(w http.ResponseWriter, r *http.Request, 
 		Url  string `json:"url"`
 	}
 	type returnVals struct {
-		Feed       Feed       `json:"feed"`
-		FeedFollow UsersFeeds `json:"feed_follow"`
+		Feed       Feed      `json:"feed"`
+		FeedFollow FeedsUser `json:"feed_follow"`
 	}
 	params := parameters{}
 	err := json.NewDecoder(r.Body).Decode(&params)
@@ -45,7 +45,7 @@ func (cfg *apiConfig) handlerFeedCreate(w http.ResponseWriter, r *http.Request, 
 		respondWithError(w, 500, "error creating feed")
 		return
 	}
-	feedFollow, err := cfg.DB.CreateFeedFollow(r.Context(), database.CreateFeedFollowParams{
+	feedFollow, err := cfg.DB.CreateFeedUser(r.Context(), database.CreateFeedUserParams{
 		ID:        uuid.New(),
 		FeedID:    feed.ID,
 		UserID:    user.ID,

@@ -1,5 +1,5 @@
--- name: CreateFeedFollow :one
-INSERT INTO users_feeds (
+-- name: CreateFeedUser :one
+INSERT INTO feeds_users (
         id,
         feed_id,
         user_id,
@@ -8,11 +8,11 @@ INSERT INTO users_feeds (
     )
 VALUES ($1, $2, $3, $4, $5)
 RETURNING *;
--- name: DeleteFeedFollow :one
-DELETE FROM users_feeds
+-- name: DeleteFeedUser :one
+DELETE FROM feeds_users
 WHERE id = $1
 RETURNING *;
--- name: GetUsersFeedFollows :many
+-- name: GetFeedsUser :many
 SELECT *
-FROM users_feeds
+FROM feeds_users
 WHERE user_id = $1;
