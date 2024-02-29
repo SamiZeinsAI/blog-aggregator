@@ -45,7 +45,7 @@ func (cfg *apiConfig) handlerFeedCreate(w http.ResponseWriter, r *http.Request, 
 		respondWithError(w, 500, "error creating feed")
 		return
 	}
-	feedFollow, err := cfg.DB.CreateFeedUser(r.Context(), database.CreateFeedUserParams{
+	feedUser, err := cfg.DB.CreateFeedUser(r.Context(), database.CreateFeedUserParams{
 		ID:        uuid.New(),
 		FeedID:    feed.ID,
 		UserID:    user.ID,
@@ -58,6 +58,6 @@ func (cfg *apiConfig) handlerFeedCreate(w http.ResponseWriter, r *http.Request, 
 	}
 	respondWithJSON(w, 200, returnVals{
 		Feed:       databaseFeedToFeed(feed),
-		FeedFollow: databaseUsersFeedsToUsersFeeds(feedFollow),
+		FeedFollow: databaseUsersFeedsToUsersFeeds(feedUser),
 	})
 }
