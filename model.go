@@ -45,7 +45,17 @@ type User struct {
 	ApiKey    string
 }
 
-type UsersFeed struct {
+func databaseUsersFeedsToUsersFeeds(usersFeeds database.UsersFeed) UsersFeeds {
+	return UsersFeeds{
+		ID:        usersFeeds.ID,
+		FeedID:    usersFeeds.FeedID,
+		UserID:    usersFeeds.UserID,
+		CreatedAt: usersFeeds.CreatedAt,
+		UpdatedAt: usersFeeds.UpdatedAt,
+	}
+}
+
+type UsersFeeds struct {
 	ID        uuid.UUID
 	FeedID    uuid.UUID
 	UserID    uuid.UUID

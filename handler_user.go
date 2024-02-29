@@ -34,6 +34,5 @@ func (cfg *apiConfig) handlerUsersCreate(w http.ResponseWriter, r *http.Request)
 		respondWithError(w, 500, "Error posting user to database")
 		return
 	}
-	respBody := databaseUserToUser(user)
-	respondWithJSON(w, http.StatusOK, respBody)
+	respondWithJSON(w, http.StatusOK, databaseUserToUser(user))
 }

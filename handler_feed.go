@@ -23,6 +23,10 @@ func (cfg *apiConfig) handlerFeedCreate(w http.ResponseWriter, r *http.Request, 
 		Name string `json:"name"`
 		Url  string `json:"url"`
 	}
+	type returnVals struct {
+		Feed       Feed       `json:"feed"`
+		FeedFollow UsersFeeds `json:"feed_follow"`
+	}
 	params := parameters{}
 	err := json.NewDecoder(r.Body).Decode(&params)
 	if err != nil {
@@ -38,8 +42,22 @@ func (cfg *apiConfig) handlerFeedCreate(w http.ResponseWriter, r *http.Request, 
 		UserID:    user.ID,
 	})
 	if err != nil {
-		respondWithError(w, 400, "error creating feed")
+		respondWithError(w, 500, "error creating feed")
 		return
 	}
-	respondWithJSON(w, 200, databaseFeedToFeed(feed))
+	feedFollow, err := cfg.DB.CreateFeedFollow(r.Context(), database.CreateFeedFollowParams{
+		ID:        uuid.New(),
+		FeedID:    feed.ID,
+		UserID:    user.ID,
+		CreatedAt: time.Now().UTC(),
+		UpdatedAt: time.Now().UTC(),
+	})
+	if err != nil {
+		respondWithError(w, 500, "error creating feed follow")
+		return
+	}
+	respondWithJSON(w, 200, returnVals{
+		Feed:       databaseFeedToFeed(feed),
+		FeedFollow: databaseUsersFeedsToUsersFeeds(feedFollow),
+	})
 }
