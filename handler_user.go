@@ -10,41 +10,14 @@ import (
 )
 
 func (cfg *apiConfig) handlerUsersGet(w http.ResponseWriter, r *http.Request, user database.User) {
-	type returnVals struct {
-		Id        string `json:"id"`
-		CreatedAt string `json:"created_at"`
-		UpdatedAt string `json:"updated_at"`
-		Name      string `json:"name"`
-		ApiKey    string `json:"api_key"`
-	}
-	respBody := returnVals{
-		Id:        user.ID.String(),
-		CreatedAt: user.CreatedAt.String(),
-		UpdatedAt: user.UpdatedAt.String(),
-		Name:      user.Name,
-		ApiKey:    user.ApiKey,
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	err := json.NewEncoder(w).Encode(respBody)
-	if err != nil {
-		respondWithError(w, 500, "Error encoding response body")
-		return
-	}
+	respondWithJSON(w, http.StatusOK, databaseUserToUser(user))
 }
 
 func (cfg *apiConfig) handlerUsersCreate(w http.ResponseWriter, r *http.Request) {
 	type paramters struct {
 		Name string `json:"name"`
 	}
-	type returnVals struct {
-		Id        string `json:"id"`
-		CreatedAt string `json:"created_at"`
-		UpdatedAt string `json:"updated_at"`
-		Name      string `json:"name"`
-		ApiKey    string `json:"api_key"`
-	}
+
 	params := paramters{}
 	err := json.NewDecoder(r.Body).Decode(&params)
 	if err != nil {
@@ -61,18 +34,6 @@ func (cfg *apiConfig) handlerUsersCreate(w http.ResponseWriter, r *http.Request)
 		respondWithError(w, 500, "Error posting user to database")
 		return
 	}
-	respBody := returnVals{
-		Id:        user.ID.String(),
-		CreatedAt: user.CreatedAt.String(),
-		UpdatedAt: user.UpdatedAt.String(),
-		Name:      user.Name,
-		ApiKey:    user.ApiKey,
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	err = json.NewEncoder(w).Encode(respBody)
-	if err != nil {
-		respondWithError(w, 500, "Error encoding response body")
-		return
-	}
+	respBody := databaseUserToUser(user)
+	respondWithJSON(w, http.StatusOK, respBody)
 }
