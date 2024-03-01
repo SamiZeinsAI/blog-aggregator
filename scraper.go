@@ -2,11 +2,13 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"sync"
 	"time"
 
 	"github.com/SamiZeinsAI/blog-aggregator/internal/database"
+	"github.com/google/uuid"
 )
 
 func (cfg *apiConfig) scraper() error {
@@ -17,6 +19,7 @@ func (cfg *apiConfig) scraper() error {
 	for {
 		select {
 		case <-ticker.C:
+			fmt.Println("start of scraper loop")
 			feeds, err := cfg.DB.GetNextFeedsToFetch(context.Background(), limit)
 			if err != nil {
 				return err
@@ -24,10 +27,7 @@ func (cfg *apiConfig) scraper() error {
 
 			for _, feed := range feeds {
 				wg.Add(1)
-				go func(feed database.Feed) {
-					wg.Done()
-					processFeed(feed)
-				}(feed)
+				go cfg.processFeed(&wg, feed)
 			}
 			wg.Wait()
 
@@ -38,14 +38,33 @@ func (cfg *apiConfig) scraper() error {
 	}
 }
 
-func processFeed(feed database.Feed) error {
+func (cfg *apiConfig) processFeed(wg *sync.WaitGroup, feed database.Feed) error {
+	defer wg.Done()
 	rssFeed, err := fetchRSSFeed(feed.Url)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("%s\n", rssFeed.Channel.Title)
-	for _, post := range rssFeed.Channel.Items {
-		fmt.Printf("%s\n", post.Title)
+	for _, item := range rssFeed.Channel.Items {
+		publishedAt := sql.NullTime{}
+		if t, err := time.Parse(time.RFC1123Z, item.PubDate); err == nil {
+			publishedAt = sql.NullTime{
+				Time:  t,
+				Valid: true,
+			}
+		}
+		_, _ = cfg.DB.CreatePost(context.Background(), database.CreatePostParams{
+			ID:        uuid.New(),
+			CreatedAt: time.Now().UTC(),
+			UpdatedAt: time.Now().UTC(),
+			Title:     item.Title,
+			Url:       item.Link,
+			Description: sql.NullString{
+				String: item.Description,
+				Valid:  true,
+			},
+			PublishedAt: publishedAt,
+			FeedID:      feed.ID,
+		})
 	}
 	return nil
 }
