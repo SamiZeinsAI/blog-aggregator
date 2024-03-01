@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -20,14 +19,7 @@ type apiConfig struct {
 }
 
 func main() {
-
-	feed, err := fetchRSSFeed("https://blog.boot.dev/index.xml")
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("%v", feed)
-
-	err = godotenv.Load()
+	err := godotenv.Load()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -41,6 +33,8 @@ func main() {
 		port: os.Getenv("PORT"),
 		DB:   database.New(conn),
 	}
+
+	go apiCfg.scraper()
 
 	router := chi.NewRouter()
 	router.Use(cors.Handler(cors.Options{
