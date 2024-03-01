@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -19,7 +20,14 @@ type apiConfig struct {
 }
 
 func main() {
-	err := godotenv.Load()
+
+	feed, err := fetchRSSFeed("https://blog.boot.dev/index.xml")
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("%v", feed)
+
+	err = godotenv.Load()
 	if err != nil {
 		log.Fatal(err)
 	}

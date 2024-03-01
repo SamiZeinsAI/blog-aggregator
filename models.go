@@ -1,11 +1,31 @@
 package main
 
 import (
+	"encoding/xml"
 	"time"
 
 	"github.com/SamiZeinsAI/blog-aggregator/internal/database"
 	"github.com/google/uuid"
 )
+
+type RSSFeed struct {
+	XMLName xml.Name `xml:"rss"`
+	Channel Channel  `xml:"channel"`
+}
+type Channel struct {
+	Title       string `xml:"title"`
+	Link        string `xml:"link"`
+	Description string `xml:"description"`
+	Items       []Item `xml:"item"`
+}
+
+type Item struct {
+	Title       string `xml:"title"`
+	Link        string `xml:"link"`
+	PubDate     string `xml:"pubDate"`
+	GUID        string `xml:"guid"`
+	Description string `xml:"description"`
+}
 
 func databaseFeedToFeed(feed database.Feed) Feed {
 	return Feed{
